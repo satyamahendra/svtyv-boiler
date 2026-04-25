@@ -7,8 +7,8 @@ import GoogleItem from "./components/google-item"
 
 const Page = () => {
     return (
-        <main className="flex min-h-screen items-center justify-center bg-secondary">
-            <Card className="w-[300px] bg-background">
+        <main className="flex min-h-screen items-center justify-center">
+            <Card className="w-[300px]">
                 <CardHeader>
                     <CardTitle className="font-bold">Svtyv</CardTitle>
                     <CardDescription>Sign in to your account</CardDescription>

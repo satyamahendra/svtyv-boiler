@@ -10,7 +10,7 @@ export default function Home() {
     }
 
     return (
-        <main className="flex flex-col flex-1 items-center justify-center bg-secondary font-sans">
+        <main className="flex flex-col flex-1 items-center justify-center bg-background font-sans">
             <p className="max-w-md text-lg leading-8 text-foreground mb-2">Welcome to main page!</p>
             <div className="flex gap-2">
                 <Link href={"/auth"}>

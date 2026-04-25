@@ -11,7 +11,7 @@ import {toast} from "sonner"
 const GoogleItem = () => {
     const [isLoading, setIsLoading] = useState(false)
     const searchParams = useSearchParams()
-    const callback = searchParams.get("callback") || "/"
+    const callback = searchParams.get("callback") || "/home"
 
     const handleSignIn = async () => {
         setIsLoading(true)
