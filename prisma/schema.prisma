@@ -1,8 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
   output   = "./generated/prisma"
@@ -13,26 +11,25 @@ datasource db {
 }
 
 model User {
-  id            String    @id
+  id            String           @id
   name          String
-  email         String
-  emailVerified Boolean   @default(false)
+  email         String           @unique
+  emailVerified Boolean          @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
   sessions      Session[]
   accounts      Account[]
   roles         UserRole[]
   permissions   UserPermission[]
 
-  @@unique([email])
   @@map("user")
 }
 
 model Session {
   id        String   @id
   expiresAt DateTime
-  token     String
+  token     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   ipAddress String?
@@ -40,7 +37,6 @@ model Session {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
   @@index([userId])
   @@map("session")
 }
@@ -79,8 +75,7 @@ model Verification {
 }
 
 model Role {
-  id          String  @id @default(uuid())
-  name        String
+  name        String           @id
   users       UserRole[]
   permissions RolePermission[]
 
@@ -88,40 +83,39 @@ model Role {
 }
 
 model Permission {
-  id          String  @id @default(uuid())
-  name        String
-  users       UserPermission[]
-  roles       RolePermission[]
+  name  String           @id
+  users UserPermission[]
+  roles RolePermission[]
 
   @@map("permission")
 }
 
 model UserRole {
-  id        String  @id @default(uuid())
-  role_id   String
   user_id   String
-  user      User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  role      Role    @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  role_name String
+  user      User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  role      Role   @relation(fields: [role_name], references: [name], onDelete: Cascade)
 
+  @@id([user_id, role_name])  // composite PK, no need for a separate id
   @@map("user_role")
 }
 
 model UserPermission {
-  id              String      @id @default(uuid())
-  permission_id   String
   user_id         String
-  user            User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  permission      Permission  @relation(fields: [permission_id], references: [id], onDelete: Cascade)
+  permission_name String
+  user            User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  permission      Permission @relation(fields: [permission_name], references: [name], onDelete: Cascade)
 
+  @@id([user_id, permission_name])  // composite PK
   @@map("user_permission")
 }
 
 model RolePermission {
-  id              String      @id @default(uuid())
-  role_id         String
-  permission_id   String
-  role            Role        @relation(fields: [role_id], references: [id], onDelete: Cascade)
-  permission      Permission  @relation(fields: [permission_id], references: [id], onDelete: Cascade)
+  role_name       String
+  permission_name String
+  role            Role       @relation(fields: [role_name], references: [name], onDelete: Cascade)
+  permission      Permission @relation(fields: [permission_name], references: [name], onDelete: Cascade)
 
+  @@id([role_name, permission_name])  // composite PK
   @@map("role_permission")
 }

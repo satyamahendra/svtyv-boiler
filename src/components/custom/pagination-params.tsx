@@ -1,6 +1,6 @@
 "use client"
 
-import {usePathname, useSearchParams, useRouter} from "next/navigation"
+import {useQueryParams} from "@/utils/hooks/useQueryParams"
 import {Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious} from "../ui/pagination"
 
 type PaginationParamsProps = {
@@ -8,20 +8,12 @@ type PaginationParamsProps = {
 }
 
 const PaginationParams = ({pageCount}: PaginationParamsProps) => {
-    const pathname = usePathname()
-    const searchParams = useSearchParams()
-    const router = useRouter()
+    const {getParam, setParams} = useQueryParams()
 
-    const currPage = Number(searchParams.get("page")) || 1
+    const currPage = Number(getParam("page")) || 1
 
     const handleSelectPage = (page: number) => {
-        const params = new URLSearchParams(searchParams)
-        if (page) {
-            params.set("page", page.toString())
-        } else {
-            params.delete("page")
-        }
-        router.replace(`${pathname}?${params.toString()}`)
+        setParams({page: page.toString()})
     }
 
     const handleNextPage = () => {
@@ -40,7 +32,7 @@ const PaginationParams = ({pageCount}: PaginationParamsProps) => {
                 </PaginationItem>
                 {Array.from({length: pageCount}, (_, i) => i + 1).map((page) => (
                     <PaginationItem key={page}>
-                        <PaginationLink onClick={() => handleSelectPage(page)} isActive={currPage == page}>
+                        <PaginationLink onClick={() => handleSelectPage(page)} isActive={currPage === page}>
                             {page}
                         </PaginationLink>
                     </PaginationItem>
