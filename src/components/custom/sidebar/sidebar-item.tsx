@@ -4,13 +4,16 @@ import {useState} from "react"
 import {ChevronDown} from "lucide-react"
 import {Collapsible, CollapsibleContent, CollapsibleTrigger} from "@/components/ui/collapsible"
 import {cn} from "@/lib/utils"
-import {MenuItem} from "@/utils/constants/sidebar"
+import {hasAccess, MenuItem} from "@/utils/constants/sidebar"
 
-const SidebarItem = ({item}: {item: MenuItem}) => {
+const SidebarItem = ({item, userPermissions, userRoles}: {item: MenuItem; userPermissions: string[]; userRoles: string[]}) => {
     const pathname = usePathname()
-    const hasChildren = item.children.length > 0
+
+    const accessibleChildren = item.children.filter((child) => hasAccess(child, userPermissions, userRoles))
+
+    const hasChildren = accessibleChildren.length > 0
     const isActive = pathname === item.href
-    const isChildActive = item.children.some((child) => pathname === child.href)
+    const isChildActive = accessibleChildren.some((child) => pathname === child.href)
 
     const [open, setOpen] = useState(isChildActive)
 
@@ -45,8 +48,8 @@ const SidebarItem = ({item}: {item: MenuItem}) => {
                 </CollapsibleTrigger>
                 <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
                     <ul className="ml-4 mt-1 flex flex-col gap-1 border-l pl-3">
-                        {item.children.map((child) => (
-                            <SidebarItem key={child.label} item={child} />
+                        {accessibleChildren.map((child) => (
+                            <SidebarItem key={child.label} item={child} userPermissions={userPermissions} userRoles={userRoles} />
                         ))}
                     </ul>
                 </CollapsibleContent>
