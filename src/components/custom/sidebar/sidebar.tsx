@@ -16,9 +16,9 @@ const Sidebar = () => {
                 <h1 className="text-xl tracking-tighter text-center">svtyv</h1>
                 <ul className="flex flex-col gap-1 mt-4">
                     {menuItems
-                        .filter((item) => hasAccess(item, userPermissions, userRoles))
-                        .map((item) => (
-                            <SidebarItem key={item.href} item={item} userPermissions={userPermissions} userRoles={userRoles} />
+                        .filter((menu) => hasAccess(menu, userPermissions, userRoles))
+                        .map((menu) => (
+                            <SidebarItem key={menu.label} menu={menu} userPermissions={userPermissions} userRoles={userRoles} />
                         ))}
                 </ul>
             </div>

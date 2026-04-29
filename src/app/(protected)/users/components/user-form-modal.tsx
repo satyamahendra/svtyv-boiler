@@ -15,7 +15,7 @@ import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query"
 import {getPermissionsAndRoles} from "../services/get-permissions-roles"
 import {getUser} from "../services/get-user"
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar"
-import {updateUser} from "./update-user"
+import {updateUser} from "../services/update-user"
 import {toast} from "sonner"
 
 const UserFormModal = () => {

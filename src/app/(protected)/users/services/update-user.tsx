@@ -48,7 +48,7 @@ export async function updateUser(data: UserFormSchema): Promise<MutationResult<U
             return updated
         })
 
-        revalidatePath("/users")
+        revalidatePath("/")
         return {success: true, data: updated, message: `User updated successfully`}
     } catch (error) {
         return handleMutationError(error)

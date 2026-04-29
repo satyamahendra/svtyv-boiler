@@ -30,7 +30,7 @@ export const menuItems = [
     },
     {
         label: "Test",
-        href: "/test",
+        href: "",
         icon: <PiRobot />,
         permissions: [],
         roles: [],
@@ -55,7 +55,7 @@ export const menuItems = [
     },
     {
         label: "Admin",
-        href: "/admin",
+        href: "",
         icon: <PiCreditCard />,
         permissions: [],
         roles: [],
