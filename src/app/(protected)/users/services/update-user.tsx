@@ -3,34 +3,22 @@
 import prisma from "@/lib/prisma/client"
 import {revalidatePath} from "next/cache"
 import {authServer} from "@/lib/auth-server"
-import {handleMutationError} from "@/utils/helpers/handle-action-errors"
-import {UserFormSchema, userSchema} from "../utils/schemas"
-import {MutationResult} from "@/utils/types/server-action"
+import {handleServerError} from "@/utils/helpers/handle-server-errors"
+import {userSchema, UserFormSchema} from "../utils/schemas"
+import {ServerResult} from "@/utils/types/server-action"
 import {User} from "@/generated/index"
 
-export async function updateUser(data: UserFormSchema): Promise<MutationResult<User>> {
-    const parsed = userSchema.safeParse(data)
-
-    if (!parsed.success) {
-        return {
-            success: false,
-            data: null as any,
-            message: "Invalid data",
-            errors: parsed.error.flatten<string>((issue) => issue.message).fieldErrors,
-        }
-    }
-
+export async function updateUser(data: UserFormSchema): Promise<ServerResult<User>> {
     try {
+        const parsed = userSchema.parse(data)
+
         const session = await authServer()
+        if (!session) throw new Error("Unauthorized")
 
-        if (!session) {
-            return {success: false, data: null as any, message: "Unauthorized"}
-        }
-
-        const {id, permissions = [], roles = []} = parsed.data
+        const {id, permissions = [], roles = []} = parsed
 
         const updated = await prisma.$transaction(async (tx) => {
-            const updated = await tx.user.update({
+            return tx.user.update({
                 where: {id},
                 data: {
                     roles: {
@@ -44,13 +32,11 @@ export async function updateUser(data: UserFormSchema): Promise<MutationResult<U
                 },
                 select: {id: true, name: true, email: true, image: true, emailVerified: true, createdAt: true, updatedAt: true},
             })
-
-            return updated
         })
 
         revalidatePath("/")
-        return {success: true, data: updated, message: `User updated successfully`}
+        return {success: true, data: updated, message: "User updated successfully"}
     } catch (error) {
-        return handleMutationError(error)
+        return handleServerError(error)
     }
 }

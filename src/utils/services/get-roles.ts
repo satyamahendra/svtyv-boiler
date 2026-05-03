@@ -2,27 +2,24 @@
 
 import {Role} from "@/generated/index"
 import prisma from "@/lib/prisma/client"
-import {ActionResult} from "@/utils/types/server-action"
+import {ServerResult} from "@/utils/types/server-action"
 import {authServer} from "@/lib/auth-server"
+import {handleServerError} from "../helpers/handle-server-errors"
 
-export async function getRoles(): Promise<ActionResult<Role[]>> {
+export async function getRoles(): Promise<ServerResult<Role[]>> {
     try {
         const session = await authServer()
 
-        if (!session) {
-            return {success: false, error: "Unauthorized"}
-        }
+        if (!session) throw new Error("Unauthorized")
 
         const roles = await prisma.role.findMany({
             select: {name: true},
         })
 
-        if (!roles) {
-            return {success: false, error: "Roles not found"}
-        }
+        if (!roles) throw new Error("Roles not found")
 
-        return {success: true, data: roles as Role[]}
+        return {success: true, data: roles as Role[], message: "Roles fetched successfully"}
     } catch (error) {
-        return {success: false, error: "Failed to fetch roles"}
+        return handleServerError(error)
     }
 }

@@ -2,8 +2,8 @@
 
 import {Prisma} from "@/generated/index"
 import prisma from "@/lib/prisma/client"
-
-const PAGE_SIZE = 10
+import {PAGE_SIZE} from "@/utils/constants/pagination"
+import {Pagination} from "@/utils/types/pagination"
 
 const userSelect = Prisma.validator<Prisma.UserSelect>()({
     id: true,
@@ -23,11 +23,7 @@ export type User = Prisma.UserGetPayload<{select: typeof userSelect}>
 
 export type UsersPage = {
     users: User[]
-    pagination: {
-        total: number
-        page: number
-        pageCount: number
-    }
+    pagination: Pagination
 }
 
 export async function getUsers(page: number = 1): Promise<UsersPage> {

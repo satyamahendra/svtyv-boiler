@@ -1,9 +1,10 @@
 "use server"
 
-import {Permission, Prisma, Role} from "@/generated/index"
+import {Prisma} from "@/generated/index"
 import {authServer} from "@/lib/auth-server"
 import prisma from "@/lib/prisma/client"
-import {ActionResult} from "@/utils/types/server-action"
+import {handleServerError} from "@/utils/helpers/handle-server-errors"
+import {ServerResult} from "@/utils/types/server-action"
 
 const selectUser = Prisma.validator<Prisma.UserSelect>()({
     id: true,
@@ -21,25 +22,21 @@ const selectUser = Prisma.validator<Prisma.UserSelect>()({
 
 type Response = Prisma.UserGetPayload<{select: typeof selectUser}>
 
-export async function getUser(id: string): Promise<ActionResult<Response>> {
+export async function getUser(id: string): Promise<ServerResult<Response>> {
     try {
         const session = await authServer()
 
-        if (!session) {
-            return {success: false, error: "Unauthorized"}
-        }
+        if (!session) throw new Error("Unauthorized")
 
         const user = await prisma.user.findUnique({
             where: {id: id},
             select: selectUser,
         })
 
-        if (!user) {
-            return {success: false, error: "User not found"}
-        }
+        if (!user) throw new Error("User not found")
 
-        return {success: true, data: user}
+        return {success: true, data: user, message: "User fetched successfully"}
     } catch (error) {
-        return {success: false, error: "Failed to fetch role"}
+        return handleServerError(error)
     }
 }

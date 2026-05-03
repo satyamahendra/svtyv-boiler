@@ -3,31 +3,20 @@
 import prisma from "@/lib/prisma/client"
 import {revalidatePath} from "next/cache"
 import {RoleFormSchema, roleSchema} from "../utils/schemas"
-import {MutationResult} from "@/utils/types/server-action"
+import {ServerResult} from "@/utils/types/server-action"
 import {Role} from "@/generated/index"
 import {authServer} from "@/lib/auth-server"
-import {handleMutationError} from "@/utils/helpers/handle-action-errors"
+import {handleServerError} from "@/utils/helpers/handle-server-errors"
 
-export async function createUpdateRole(data: RoleFormSchema): Promise<MutationResult<Role>> {
-    const parsed = roleSchema.safeParse(data)
-
-    if (!parsed.success) {
-        return {
-            success: false,
-            data: null as any,
-            message: "Invalid data",
-            errors: parsed.error.flatten<string>((issue) => issue.message).fieldErrors,
-        }
-    }
-
+export async function createUpdateRole(data: RoleFormSchema): Promise<ServerResult<Role>> {
     try {
+        const parsed = roleSchema.safeParse(data)
+
         const session = await authServer()
 
-        if (!session) {
-            return {success: false, data: null as any, message: "Unauthorized"}
-        }
+        if (!session) throw new Error("Unauthorized")
 
-        const {name, name_before, permissions = []} = parsed.data
+        const {name, name_before, permissions = []} = parsed.data as RoleFormSchema
 
         let role: Role
 
@@ -63,6 +52,6 @@ export async function createUpdateRole(data: RoleFormSchema): Promise<MutationRe
         const action = name_before ? "updated" : "created"
         return {success: true, data: role, message: `Role ${action} successfully`}
     } catch (error) {
-        return handleMutationError(error)
+        return handleServerError(error)
     }
 }

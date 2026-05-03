@@ -2,10 +2,9 @@
 
 import {useEffect} from "react"
 import {Controller, useForm} from "react-hook-form"
-import {PiKey, PiPlus} from "react-icons/pi"
-
+import {PiKey} from "react-icons/pi"
 import {Button} from "@/components/ui/button"
-import {Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog"
+import {Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog"
 import {Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet} from "@/components/ui/field"
 import {Loader2} from "lucide-react"
 import {Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle} from "@/components/ui/empty"
@@ -17,6 +16,7 @@ import {getUser} from "../services/get-user"
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar"
 import {updateUser} from "../services/update-user"
 import {toast} from "sonner"
+import {UserFormSchema} from "../utils/schemas"
 
 const UserFormModal = () => {
     const queryClient = useQueryClient()
@@ -24,7 +24,7 @@ const UserFormModal = () => {
 
     const id = getParam("id")
 
-    const form = useForm<any>({
+    const form = useForm<UserFormSchema>({
         defaultValues: {
             id: id ?? "",
             roles: [],
@@ -57,19 +57,19 @@ const UserFormModal = () => {
         },
     })
 
-    const onSubmit = (data: any) => {
+    const onSubmit = (data: UserFormSchema) => {
         mutate(data)
     }
 
     useEffect(() => {
         if (userData?.success && userData.data) {
             form.reset({
-                id: id,
-                roles: userData.data.roles.map((r: any) => r.role_name),
-                permissions: userData.data.permissions.map((p: any) => p.permission_name),
+                id: id ?? "",
+                roles: userData.data.roles.map((r: {role_name: string}) => r.role_name),
+                permissions: userData.data.permissions.map((p: {permission_name: string}) => p.permission_name),
             })
         }
-    }, [userData, form.reset, id])
+    }, [userData, form, id])
 
     return (
         <Dialog open={!!id} onOpenChange={(open) => !open && setParams({id: ""})}>

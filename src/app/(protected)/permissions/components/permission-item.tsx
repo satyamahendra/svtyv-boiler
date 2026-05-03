@@ -2,7 +2,7 @@
 
 import {TableCell, TableRow} from "@/components/ui/table"
 import {Button} from "@/components/ui/button"
-import {PiArrowSquareOut, PiCaretRight, PiTrash} from "react-icons/pi"
+import {PiArrowSquareOut} from "react-icons/pi"
 import {useQueryParams} from "@/utils/hooks/useQueryParams"
 import DeleteButton from "./delete-button"
 import {PermissionWithRoles} from "../services/get-permissions"

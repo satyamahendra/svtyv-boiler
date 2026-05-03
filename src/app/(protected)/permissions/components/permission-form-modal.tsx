@@ -83,7 +83,7 @@ const PermissionFormModal = () => {
                 roles: permissionData.data.roles.map((role) => role.role_name),
             })
         }
-    }, [view, permissionData])
+    }, [view, permissionData, form, refetchPermission])
 
     return (
         <Dialog open={!!view} onOpenChange={(e) => (e ? setParams({view: "create"}) : setParams({view: ""}))}>

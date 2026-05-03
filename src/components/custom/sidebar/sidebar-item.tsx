@@ -3,7 +3,6 @@
 import Link from "next/link"
 import {usePathname} from "next/navigation"
 import {useState, useEffect} from "react"
-import {ChevronDown} from "lucide-react"
 import {Collapsible, CollapsibleContent, CollapsibleTrigger} from "@/components/ui/collapsible"
 import {cn} from "@/lib/utils"
 import {hasAccess, MenuItem} from "@/utils/constants/sidebar"

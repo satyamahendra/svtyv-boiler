@@ -2,22 +2,18 @@
 
 import prisma from "@/lib/prisma/client"
 import {revalidatePath} from "next/cache"
-import {MutationResult} from "@/utils/types/server-action"
+import {ServerResult} from "@/utils/types/server-action"
 import {Permission} from "@/generated/index"
 import {authServer} from "@/lib/auth-server"
-import {handleMutationError} from "@/utils/helpers/handle-action-errors"
+import {handleServerError} from "@/utils/helpers/handle-server-errors"
 
-export async function deletePermission(permissionName: string): Promise<MutationResult<Permission>> {
+export async function deletePermission(permissionName: string): Promise<ServerResult<Permission>> {
     try {
-        let permission: Permission
-
         const session = await authServer()
 
-        if (!session) {
-            return {success: false, data: null as any, message: "Unauthorized"}
-        }
+        if (!session) throw new Error("Unauthorized")
 
-        permission = (await prisma.permission.delete({
+        const permission = (await prisma.permission.delete({
             where: {name: permissionName},
             select: {name: true},
         })) as Permission
@@ -25,6 +21,6 @@ export async function deletePermission(permissionName: string): Promise<Mutation
         revalidatePath("/permissions")
         return {success: true, data: permission, message: `Permission deleted successfully`}
     } catch (error) {
-        return handleMutationError(error)
+        return handleServerError(error)
     }
 }

@@ -3,8 +3,8 @@
 import {Prisma} from "@/generated/index"
 import {authServer} from "@/lib/auth-server"
 import prisma from "@/lib/prisma/client"
-
-const PAGE_SIZE = 10
+import {PAGE_SIZE} from "@/utils/constants/pagination"
+import {Pagination} from "@/utils/types/pagination"
 
 const permissionSelect = Prisma.validator<Prisma.PermissionSelect>()({
     name: true,
@@ -17,11 +17,7 @@ export type PermissionWithRoles = Prisma.PermissionGetPayload<{select: typeof pe
 
 export type PermissionsPage = {
     permissions: PermissionWithRoles[]
-    pagination: {
-        total: number
-        page: number
-        pageCount: number
-    }
+    pagination: Pagination
 }
 
 export async function getPermissions(page: number = 1): Promise<PermissionsPage> {

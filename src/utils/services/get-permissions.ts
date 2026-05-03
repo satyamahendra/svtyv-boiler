@@ -2,20 +2,19 @@
 
 import {Permission} from "@/generated/index"
 import prisma from "@/lib/prisma/client"
-import {ActionResult} from "@/utils/types/server-action"
+import {ServerResult} from "@/utils/types/server-action"
+import {handleServerError} from "../helpers/handle-server-errors"
 
-export async function getPermissions(): Promise<ActionResult<Permission[]>> {
+export async function getPermissions(): Promise<ServerResult<Permission[]>> {
     try {
         const permissions = await prisma.permission.findMany({
             select: {name: true},
         })
 
-        if (!permissions) {
-            return {success: false, error: "Permissions not found"}
-        }
+        if (!permissions) throw new Error("Permissions not found")
 
-        return {success: true, data: permissions}
+        return {success: true, data: permissions, message: "Permissions fetched successfully"}
     } catch (error) {
-        return {success: false, error: "Failed to fetch permissions"}
+        return handleServerError(error)
     }
 }

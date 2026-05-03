@@ -2,9 +2,10 @@
 
 import {Permission, Role} from "@/generated/index"
 import prisma from "@/lib/prisma/client"
-import {ActionResult} from "@/utils/types/server-action"
+import {handleServerError} from "@/utils/helpers/handle-server-errors"
+import {ServerResult} from "@/utils/types/server-action"
 
-export async function getPermissionsAndRoles(): Promise<ActionResult<{permissions: Permission[]; roles: Role[]}>> {
+export async function getPermissionsAndRoles(): Promise<ServerResult<{permissions: Permission[]; roles: Role[]}>> {
     try {
         const permissions = await prisma.permission.findMany({
             select: {name: true},
@@ -14,8 +15,8 @@ export async function getPermissionsAndRoles(): Promise<ActionResult<{permission
             select: {name: true},
         })
 
-        return {success: true, data: {permissions, roles}}
+        return {success: true, data: {permissions, roles}, message: "Permissions and roles fetched successfully"}
     } catch (error) {
-        return {success: false, error: "Failed to fetch permissions"}
+        return handleServerError(error)
     }
 }

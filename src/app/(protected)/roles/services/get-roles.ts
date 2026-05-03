@@ -3,8 +3,8 @@
 import prisma from "@/lib/prisma/client"
 import {Prisma} from "@/generated/index"
 import {authServer} from "@/lib/auth-server"
-
-const PAGE_SIZE = 10
+import {Pagination} from "@/utils/types/pagination"
+import {PAGE_SIZE} from "@/utils/constants/pagination"
 
 const roleSelect = Prisma.validator<Prisma.RoleSelect>()({
     name: true,
@@ -17,11 +17,7 @@ export type RoleWithPermissions = Prisma.RoleGetPayload<{select: typeof roleSele
 
 export type RolesPage = {
     roles: RoleWithPermissions[]
-    pagination: {
-        total: number
-        page: number
-        pageCount: number
-    }
+    pagination: Pagination
 }
 
 export const getRoles = async (page: number = 1): Promise<RolesPage> => {

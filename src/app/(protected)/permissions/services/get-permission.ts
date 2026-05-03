@@ -3,17 +3,16 @@
 import {Permission} from "@/generated/index"
 import {authServer} from "@/lib/auth-server"
 import prisma from "@/lib/prisma/client"
-import {ActionResult} from "@/utils/types/server-action"
+import {handleServerError} from "@/utils/helpers/handle-server-errors"
+import {ServerResult} from "@/utils/types/server-action"
 
 type Response = Permission & {roles: {role_name: string}[]}
 
-export async function getPermission(name: string): Promise<ActionResult<Response>> {
+export async function getPermission(name: string): Promise<ServerResult<Response>> {
     try {
         const session = await authServer()
 
-        if (!session) {
-            return {success: false, error: "Unauthorized"}
-        }
+        if (!session) throw new Error("Unauthorized")
 
         const permission = await prisma.permission.findUnique({
             where: {name},
@@ -24,12 +23,10 @@ export async function getPermission(name: string): Promise<ActionResult<Response
             },
         })
 
-        if (!permission) {
-            return {success: false, error: "Permission not found"}
-        }
+        if (!permission) throw new Error("Permission not found")
 
-        return {success: true, data: permission as Response}
+        return {success: true, data: permission as Response, message: "Permission fetched successfully"}
     } catch (error) {
-        return {success: false, error: "Failed to fetch permission"}
+        return handleServerError(error)
     }
 }
