@@ -21,12 +21,14 @@ export type PermissionsPage = {
     pagination: Pagination
 }
 
-export async function getPermissions(page: number = 1): Promise<PermissionsPage> {
+export async function getPermissions(page: number = 1, search = ""): Promise<PermissionsPage> {
     const skip = (page - 1) * PAGE_SIZE
 
     const session = await authServer()
 
     if (!session) throw new Error("Unauthorized")
+
+    const where: Prisma.PermissionWhereInput = search ? {name: {contains: search, mode: "insensitive"}} : {}
 
     const [permissions, total] = await Promise.all([
         prisma.permission.findMany({
@@ -34,8 +36,11 @@ export async function getPermissions(page: number = 1): Promise<PermissionsPage>
             take: PAGE_SIZE,
             orderBy: {name: "asc"},
             select: permissionSelect,
+            where,
         }),
-        prisma.permission.count(),
+        prisma.permission.count({
+            where,
+        }),
     ])
 
     return {

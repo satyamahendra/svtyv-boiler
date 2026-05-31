@@ -21,12 +21,14 @@ export type RolesPage = {
     pagination: Pagination
 }
 
-export const getRoles = async (page: number = 1): Promise<RolesPage> => {
+export const getRoles = async (page: number = 1, search = ""): Promise<RolesPage> => {
     const skip = (page - 1) * PAGE_SIZE
 
     const session = await authServer()
 
     if (!session) throw new Error("Unauthorized")
+
+    const where: Prisma.RoleWhereInput = search ? {name: {contains: search, mode: "insensitive"}} : {}
 
     const [roles, total] = await Promise.all([
         prisma.role.findMany({
@@ -34,8 +36,11 @@ export const getRoles = async (page: number = 1): Promise<RolesPage> => {
             take: PAGE_SIZE,
             orderBy: {name: "asc"},
             select: roleSelect,
+            where,
         }),
-        prisma.role.count(),
+        prisma.role.count({
+            where,
+        }),
     ])
 
     return {

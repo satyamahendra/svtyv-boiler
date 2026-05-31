@@ -26,8 +26,23 @@ export type UsersPage = {
     pagination: Pagination
 }
 
-export async function getUsers(page: number = 1): Promise<UsersPage> {
+export async function getUsers(page: number = 1, search = ""): Promise<UsersPage> {
     const skip = (page - 1) * PAGE_SIZE
+
+    const where = search && {
+        OR: [
+            {
+                name: {
+                    contains: search,
+                },
+            },
+            {
+                email: {
+                    contains: search,
+                },
+            },
+        ],
+    }
 
     const [users, total] = await Promise.all([
         prisma.user.findMany({
@@ -35,6 +50,7 @@ export async function getUsers(page: number = 1): Promise<UsersPage> {
             take: PAGE_SIZE,
             orderBy: {createdAt: "desc"},
             select: userSelect,
+            ...(where && {where}),
         }),
         prisma.user.count(),
     ])

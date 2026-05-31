@@ -7,11 +7,12 @@ import RoleItem from "./role-item"
 import AnimDiv from "@/components/custom/anim-div"
 
 type Props = {
-    page: number
+    page?: number
+    search?: string
 }
 
-export async function RolesTable({page}: Props) {
-    const data = await getRoles(page)
+export async function RolesTable({page, search}: Props) {
+    const data = await getRoles(page, search)
 
     return (
         <AnimDiv className="flex flex-col gap-4">
@@ -48,7 +49,9 @@ export async function RolesTable({page}: Props) {
                 </div>
             )}
 
-            {data.pagination.pageCount > 1 && <PaginationParams pageCount={data.pagination.pageCount} />}
+            <div className="ml-auto">
+                <PaginationParams className="w-fit" pageCount={data.pagination.pageCount} />
+            </div>
         </AnimDiv>
     )
 }

@@ -7,10 +7,12 @@ import UserFormModal from "./components/user-form-modal"
 import {hasPermissions} from "@/utils/helpers/has-ability-server"
 import {redirect} from "next/navigation"
 import AnimDiv from "@/components/custom/anim-div"
+import SearchParams from "@/components/custom/search-params"
 
 type PageProps = {
     searchParams: Promise<{
         page?: string
+        search?: string
     }>
 }
 
@@ -18,14 +20,16 @@ const Page = async ({searchParams}: PageProps) => {
     const hasPerm = await hasPermissions(["read users"])
     if (!hasPerm) return redirect("/home")
 
-    const {page} = await searchParams
+    const {page, search} = await searchParams
     const pageNum = page ? parseInt(page) : 1
 
     return (
         <AnimDiv className="flex flex-col gap-4">
             <PageHeader title="Users" description="Manage users" icon={<PiUser />} />
             <UserFormModal />
+            <SearchParams className="w-48 self-end" />
             <Suspense
+                key={`${pageNum}-${search}`}
                 fallback={
                     <AnimDiv className="flex items-center justify-center h-20">
                         <span className="text-muted-foreground">
@@ -33,7 +37,7 @@ const Page = async ({searchParams}: PageProps) => {
                         </span>
                     </AnimDiv>
                 }>
-                <UsersTable page={pageNum} />
+                <UsersTable page={pageNum} search={search} />
             </Suspense>
         </AnimDiv>
     )

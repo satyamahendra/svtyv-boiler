@@ -2,12 +2,15 @@
 
 import {useQueryParams} from "@/utils/hooks/useQueryParams"
 import {Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious} from "../ui/pagination"
+import {PiCaretLeft, PiCaretRight} from "react-icons/pi"
+import {Button} from "../ui/button"
 
 type PaginationParamsProps = {
+    className?: string
     pageCount: number
 }
 
-const PaginationParams = ({pageCount}: PaginationParamsProps) => {
+const PaginationParams = ({pageCount, className}: PaginationParamsProps) => {
     const {getParam, setParams} = useQueryParams()
 
     const currPage = Number(getParam("page")) || 1
@@ -25,10 +28,12 @@ const PaginationParams = ({pageCount}: PaginationParamsProps) => {
     }
 
     return (
-        <Pagination>
+        <Pagination className={className}>
             <PaginationContent>
                 <PaginationItem>
-                    <PaginationPrevious onClick={handlePrevPage} />
+                    <Button size="icon-sm" variant="ghost" onClick={handlePrevPage}>
+                        <PiCaretLeft />
+                    </Button>
                 </PaginationItem>
                 {Array.from({length: pageCount}, (_, i) => i + 1).map((page) => (
                     <PaginationItem key={page}>
@@ -38,7 +43,9 @@ const PaginationParams = ({pageCount}: PaginationParamsProps) => {
                     </PaginationItem>
                 ))}
                 <PaginationItem>
-                    <PaginationNext onClick={handleNextPage} />
+                    <Button size="icon-sm" variant="ghost" onClick={handleNextPage}>
+                        <PiCaretRight />
+                    </Button>
                 </PaginationItem>
             </PaginationContent>
         </Pagination>
