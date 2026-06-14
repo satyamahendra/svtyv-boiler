@@ -4,7 +4,7 @@ import {Button} from "@/components/ui/button"
 import {authClient} from "@/lib/auth-client"
 import {useTheme} from "next-themes"
 import {PiCalendarDots, PiCircleDashed, PiMoon, PiPower, PiSun} from "react-icons/pi"
-import {useState} from "react"
+import {useState, useEffect} from "react" // 1. Import useEffect
 import {toast} from "sonner"
 import {redirect} from "next/navigation"
 import {format} from "date-fns"
@@ -12,6 +12,12 @@ import {format} from "date-fns"
 const Topbar = () => {
     const {setTheme, theme} = useTheme()
     const [isLoading, setIsLoading] = useState(false)
+    const [mounted, setMounted] = useState(false) // 2. Track mounting status
+
+    // 3. Set mounted to true after the component loads on the browser
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     const handleLogout = async () => {
         setIsLoading(true)
@@ -38,7 +44,7 @@ const Topbar = () => {
                         variant={"outline"}
                         className="rounded-lg cursor-pointer"
                         size="icon-sm">
-                        {theme === "dark" ? <PiMoon /> : <PiSun />}
+                        {!mounted ? <div className="w-[18px] h-[18px]" /> : theme === "dark" ? <PiMoon /> : <PiSun />}
                     </Button>
                 </li>
                 <li>
