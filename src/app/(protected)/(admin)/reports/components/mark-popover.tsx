@@ -7,7 +7,7 @@ import {PiDotsThreeVertical} from "react-icons/pi"
 import {updateReport} from "../services/update-report"
 import {toast} from "sonner"
 import {Report} from "../services/get-report"
-import {StatusType} from "../utils/schema"
+import {StatusType} from "@/utils/types/report"
 
 type MarkPopoverProps = {
     report: Report
