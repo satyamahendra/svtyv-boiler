@@ -1,1 +1,1 @@
-export const VALID_PREFIXES = ["read ", "update ", "create ", "delete "]
+export const VALID_PREFIXES = ["read ", "update ", "create ", "delete ", "manage "]
