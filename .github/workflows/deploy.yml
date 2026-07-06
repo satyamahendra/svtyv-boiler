@@ -37,57 +37,57 @@ jobs:
                   cache-from: type=gha
                   cache-to: type=gha,mode=max
 
-deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-        - name: Deploy Containers to VPS via SSH
-          uses: appleboy/ssh-action@v1.2.2
-          with:
-              host: ${{ secrets.SSH_HOST }}
-              username: ${{ secrets.SSH_USERNAME }}
-              key: ${{ secrets.SSH_KEY }}
-              envs: GITHUB_TOKEN,GITHUB_ACTOR,RAW_ENV
-              script: |
-                  # 1. Temporarily log into GHCR via memory
-                  echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+    deploy:
+        runs-on: ubuntu-latest
+        needs: build
+        steps:
+            - name: Deploy Containers to VPS via SSH
+            uses: appleboy/ssh-action@v1.2.2
+            with:
+                host: ${{ secrets.SSH_HOST }}
+                username: ${{ secrets.SSH_USERNAME }}
+                key: ${{ secrets.SSH_KEY }}
+                envs: GITHUB_TOKEN,GITHUB_ACTOR,RAW_ENV
+                script: |
+                    # 1. Temporarily log into GHCR via memory
+                    echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
 
-                  # 2. Ensure isolated Docker network exists
-                  docker network create svtyv-net || true
+                    # 2. Ensure isolated Docker network exists
+                    docker network create svtyv-net || true
 
-                  # 3. Pull the updated app image
-                  docker pull ghcr.io/satyamahendra/svtyv:latest
+                    # 3. Pull the updated app image
+                    docker pull ghcr.io/satyamahendra/svtyv:latest
 
-                  # 4. Stop and remove old instances safely (errors ignored if they don't exist yet)
-                  docker stop svtyv-app svtyv-db || true
-                  docker rm svtyv-app svtyv-db || true
+                    # 4. Stop and remove old instances safely (errors ignored if they don't exist yet)
+                    docker stop svtyv-app svtyv-db || true
+                    docker rm svtyv-app svtyv-db || true
 
-                  # 5. Spin up Postgres using a process substitution stream (No physical file written!)
-                  docker run -d \
-                    --name svtyv-db \
-                    --network svtyv-net \
-                    --restart unless-stopped \
-                    -p 5433:5432 \
-                    -v postgres_data:/var/lib/postgresql/data \
-                    --env-file <(echo "$RAW_ENV") \
-                    postgres:17-alpine
+                    # 5. Spin up Postgres using a process substitution stream (No physical file written!)
+                    docker run -d \
+                        --name svtyv-db \
+                        --network svtyv-net \
+                        --restart unless-stopped \
+                        -p 5433:5432 \
+                        -v postgres_data:/var/lib/postgresql/data \
+                        --env-file <(echo "$RAW_ENV") \
+                        postgres:17-alpine
 
-                  # Give Postgres a brief moment to accept connections
-                  sleep 5
+                    # Give Postgres a brief moment to accept connections
+                    sleep 5
 
-                  # 6. Spin up App using the exact same clean stream format
-                  docker run -d \
-                    --name svtyv-app \
-                    --network svtyv-net \
-                    --restart unless-stopped \
-                    -p 3001:3000 \
-                    --env-file <(echo "$RAW_ENV") \
-                    ghcr.io/satyamahendra/svtyv:latest \
-                    sh -c "npx prisma migrate deploy && node server.js"
+                    # 6. Spin up App using the exact same clean stream format
+                    docker run -d \
+                        --name svtyv-app \
+                        --network svtyv-net \
+                        --restart unless-stopped \
+                        -p 3001:3000 \
+                        --env-file <(echo "$RAW_ENV") \
+                        ghcr.io/satyamahendra/svtyv:latest \
+                        sh -c "npx prisma migrate deploy && node server.js"
 
-                  # 7. Clean up old dangling images, keeping the running ones
-                  docker image prune -f
-          env:
-              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              GITHUB_ACTOR: ${{ github.actor }}
-              RAW_ENV: ${{ secrets.ENV }}
+                    # 7. Clean up old dangling images, keeping the running ones
+                    docker image prune -f
+            env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                GITHUB_ACTOR: ${{ github.actor }}
+                RAW_ENV: ${{ secrets.ENV }}
