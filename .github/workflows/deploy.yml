@@ -1,9 +1,9 @@
 name: Build & Deploy
 
 on:
-    push:
-        branches:
-            - main
+    release:
+        types:
+            - published
 
 permissions:
     contents: read
@@ -51,10 +51,7 @@ jobs:
                   key: ${{ secrets.SSH_KEY }}
 
                   script: |
-                      cd /apps/svtyv
-
+                      cd /home/satya/apps/svtyv
                       docker compose pull
-
                       docker compose up -d
-
                       docker image prune -af
