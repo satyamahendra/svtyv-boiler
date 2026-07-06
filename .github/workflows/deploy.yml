@@ -58,34 +58,44 @@ jobs:
                       # 3. Pull the updated app image
                       docker pull ghcr.io/satyamahendra/svtyv:latest
 
-                      # 4. Stop and remove old instances safely (errors ignored if they don't exist yet)
+                      # 4. Stop and remove old instances safely
                       docker stop svtyv-app svtyv-db || true
                       docker rm svtyv-app svtyv-db || true
 
-                      # 5. Spin up Postgres using a process substitution stream (No physical file written!)
+                      # Extract DATABASE_URL line from raw env block
+                      DB_URL_STR=$(echo "$RAW_ENV" | grep "^DATABASE_URL=")
+
+                      # Parse out user, password, and db name from the connection string natively
+                      EXTRACTED_USER=$(echo "$DB_URL_STR" | sed -E 's|DATABASE_URL=.*://([^:]+):.*|\1|')
+                      EXTRACTED_PASS=$(echo "$DB_URL_STR" | sed -E 's|DATABASE_URL=.*://[^:]+:([^@]+)@.*|\1|')
+                      EXTRACTED_NAME=$(echo "$DB_URL_STR" | sed -E 's|DATABASE_URL=.*://[^@]+@[^/]+/([^?]+).*|\1|')
+
+                      # 5. Spin up Postgres with the parsed credentials injected explicitly
                       docker run -d \
-                        --name svtyv-db \
-                        --network svtyv-net \
-                        --restart unless-stopped \
-                        -p 5433:5432 \
-                        -v postgres_data:/var/lib/postgresql/data \
-                        --env-file <(echo "$RAW_ENV") \
-                        postgres:17-alpine
+                      --name svtyv-db \
+                      --network svtyv-net \
+                      --restart unless-stopped \
+                      -p 5433:5432 \
+                      -v postgres_data:/var/lib/postgresql/data \
+                      -e POSTGRES_USER="$EXTRACTED_USER" \
+                      -e POSTGRES_PASSWORD="$EXTRACTED_PASS" \
+                      -e POSTGRES_DB="$EXTRACTED_NAME" \
+                      postgres:17-alpine
 
-                      # Give Postgres a brief moment to accept connections
-                      sleep 5
+                      # Give Postgres a full 10 seconds to create storage tables and listen
+                      sleep 10
 
-                      # 6. Spin up App using the exact same clean stream format
+                      # 6. Spin up App using the clean memory stream format
                       docker run -d \
-                        --name svtyv-app \
-                        --network svtyv-net \
-                        --restart unless-stopped \
-                        -p 3001:3000 \
-                        --env-file <(echo "$RAW_ENV") \
-                        ghcr.io/satyamahendra/svtyv:latest \
-                        sh -c "npx prisma migrate deploy && node server.js"
+                      --name svtyv-app \
+                      --network svtyv-net \
+                      --restart unless-stopped \
+                      -p 3001:3000 \
+                      --env-file <(echo "$RAW_ENV") \
+                      ghcr.io/satyamahendra/svtyv:latest \
+                      sh -c "npx prisma migrate deploy && node server.js"
 
-                      # 7. Clean up old dangling images, keeping the running ones
+                      # 7. Clean up old dangling images
                       docker image prune -f
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
