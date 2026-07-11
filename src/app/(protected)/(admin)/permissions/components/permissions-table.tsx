@@ -29,23 +29,10 @@ export async function PermissionsTable({page, search}: Props) {
                     </Empty>
                 </div>
             ) : (
-                <div className="rounded-xl border border-border overflow-hidden">
-                    <Table>
-                        <TableHeader className="bg-muted">
-                            <TableRow>
-                                <TableHead className="font-semibold w-[80px]">#</TableHead>
-                                <TableHead className="font-semibold">Name</TableHead>
-                                <TableHead className="font-semibold">Roles</TableHead>
-                                <TableHead className="font-semibold">Status</TableHead>
-                                <TableHead className="font-semibold text-right">Action</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {data.permissions.map((permission, index) => (
-                                <PermissionItem key={permission.name} permission={permission} number={index + 1 + (data.pagination.page - 1) * 10} />
-                            ))}
-                        </TableBody>
-                    </Table>
+                <div className="overflow-hidden space-y-2">
+                    {data.permissions.map((permission, index) => (
+                        <PermissionItem key={permission.name} permission={permission} number={index + 1 + (data.pagination.page - 1) * 10} />
+                    ))}
                 </div>
             )}
 

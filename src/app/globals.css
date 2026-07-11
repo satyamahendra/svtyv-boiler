@@ -421,3 +421,7 @@
         @apply font-sans;
     }
 }
+
+body {
+    position: relative;
+}

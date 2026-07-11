@@ -4,7 +4,6 @@ import {zodResolver} from "@hookform/resolvers/zod"
 import {Controller, useForm} from "react-hook-form"
 import {PiKey, PiPlus} from "react-icons/pi"
 import {Button} from "@/components/ui/button"
-import {Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger} from "@/components/ui/sheet"
 import {Input} from "@/components/ui/input"
 import {Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet} from "@/components/ui/field"
 import {PermissionFormSchema, permissionSchema} from "../utils/schemas"
@@ -19,10 +18,14 @@ import {Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle} from "@/co
 import {Checkbox} from "@/components/ui/checkbox"
 import {getRoles} from "@/utils/services/get-roles"
 import {Switch} from "@/components/ui/switch"
+import {Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger} from "@/components/ui/drawer"
+import {useScreenSize} from "@/utils/hooks/useScreenSize"
+import {cn} from "@/lib/utils"
 
 const PermissionFormModal = () => {
     const queryClient = useQueryClient()
     const {getParam, setParams} = useQueryParams()
+    const {isMobile} = useScreenSize()
 
     const view = getParam("view")
 
@@ -88,19 +91,19 @@ const PermissionFormModal = () => {
     }, [view, permissionData, form, refetchPermission])
 
     return (
-        <Sheet open={!!view} onOpenChange={(e) => (e ? setParams({view: "create"}) : setParams({view: ""}))}>
-            <SheetTrigger asChild>
+        <Drawer direction={isMobile ? "bottom" : "right"} open={!!view} onOpenChange={(e) => (e ? setParams({view: "create"}) : setParams({view: ""}))}>
+            <DrawerTrigger asChild>
                 <Button>
                     <PiPlus /> Create Permission
                 </Button>
-            </SheetTrigger>
-            <SheetContent aria-describedby="permission-form">
-                <SheetHeader>
-                    <SheetTitle className="flex items-center gap-4">{view !== "create" ? "Edit" : "Create"} Permission</SheetTitle>
-                    <SheetDescription className="flex items-center gap-4">
+            </DrawerTrigger>
+            <DrawerContent aria-describedby="permission-form" className={cn(isMobile ? "h-[80vh]" : "")}>
+                <DrawerHeader>
+                    <DrawerTitle className="flex items-center gap-4">{view !== "create" ? "Edit" : "Create"} Permission</DrawerTitle>
+                    <DrawerDescription className="flex items-center gap-4">
                         {view !== "create" ? "Edit" : "Create"} a custom permission for your organization.
-                    </SheetDescription>
-                </SheetHeader>
+                    </DrawerDescription>
+                </DrawerHeader>
 
                 <div className="px-6">
                     {isLoading ? (
@@ -184,16 +187,18 @@ const PermissionFormModal = () => {
                     )}
                 </div>
 
-                <SheetFooter>
-                    <SheetClose asChild>
-                        <Button variant="outline">Cancel</Button>
-                    </SheetClose>
+                <DrawerFooter>
+                    <DrawerClose asChild>
+                        <Button variant="outline" className="w-full">
+                            Cancel
+                        </Button>
+                    </DrawerClose>
                     <Button disabled={isPending} type="submit" form="permission-form">
                         {isPending ? <Loader2 className="animate-spin" /> : "Submit"}
                     </Button>
-                </SheetFooter>
-            </SheetContent>
-        </Sheet>
+                </DrawerFooter>
+            </DrawerContent>
+        </Drawer>
     )
 }
 

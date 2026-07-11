@@ -8,11 +8,13 @@ import {useState, useEffect} from "react" // 1. Import useEffect
 import {toast} from "sonner"
 import {redirect} from "next/navigation"
 import {format} from "date-fns"
+import {useScreenSize} from "@/utils/hooks/useScreenSize"
 
 const Topbar = () => {
     const {setTheme, theme} = useTheme()
+    const {isMobile} = useScreenSize()
     const [isLoading, setIsLoading] = useState(false)
-    const [mounted, setMounted] = useState(false) // 2. Track mounting status
+    const [mounted, setMounted] = useState(false)
 
     // 3. Set mounted to true after the component loads on the browser
     useEffect(() => {
@@ -33,7 +35,7 @@ const Topbar = () => {
         <header className="flex items-center justify-between w-full">
             <div className="flex gap-2 items-center text-sm font-light text-muted-foreground">
                 <PiCalendarDots size={18} />
-                {format(new Date(), "EEEE, MMMM d, yyyy")}
+                {mounted && !isMobile && format(new Date(), "EEEE, MMMM d, yyyy")}
             </div>
             <ul className="flex gap-2">
                 <li>
