@@ -5,7 +5,7 @@ import "@/app/globals.css"
 import {Providers} from "@/components/custom/providers/providers"
 import Script from "next/script"
 
-const inter = Inter({subsets: ["latin"], variable: "--font-sans"})
+const inter = Inter({subsets:['latin'],variable:'--font-sans'})
 
 const geistSans = Geist({
     variable: "--font-geist-sans",

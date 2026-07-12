@@ -16,7 +16,6 @@ const Topbar = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [mounted, setMounted] = useState(false)
 
-    // 3. Set mounted to true after the component loads on the browser
     useEffect(() => {
         setMounted(true)
     }, [])
