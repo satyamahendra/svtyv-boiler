@@ -7,12 +7,12 @@ import {Badge} from "@/components/ui/badge"
 import {normalizeString} from "@/utils/helpers/normalize-string"
 import {Separator} from "@/components/ui/separator"
 import {PiCalendarDots, PiChatCentered, PiEye} from "react-icons/pi"
-import {Report} from "../services/get-reports"
 import {reportStatusOptions, reportTypeOptions} from "@/utils/constants/report"
 import {Button} from "@/components/ui/button"
+import {GetReport} from "../services/get-reports"
 
 type ReportItemProps = {
-    report: Report
+    report: GetReport
 }
 
 const ReportItem = ({report}: ReportItemProps) => {

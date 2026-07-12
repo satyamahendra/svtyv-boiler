@@ -4,13 +4,13 @@ import {Button} from "@/components/ui/button"
 import {PiCircle, PiCircleFill, PiPencil} from "react-icons/pi"
 import {useQueryParams} from "@/utils/hooks/useQueryParams"
 import DeleteButton from "./delete-button"
-import {RoleWithPermissions} from "../services/get-roles"
 import {Badge} from "@/components/ui/badge"
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip"
 import {Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle} from "@/components/ui/item"
+import {GetRole} from "../services/get-roles"
 
 type RoleItemProps = {
-    role: RoleWithPermissions
+    role: GetRole
 }
 
 const RoleItem = ({role}: RoleItemProps) => {

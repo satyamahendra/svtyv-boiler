@@ -16,6 +16,11 @@ const reportSelect = Prisma.validator<Prisma.ReportSelect>()({
     order_id: true,
     resolved_at: true,
     status: true,
+    _count: {
+        select: {
+            messages: true,
+        },
+    },
     user: {
         select: {
             id: true,

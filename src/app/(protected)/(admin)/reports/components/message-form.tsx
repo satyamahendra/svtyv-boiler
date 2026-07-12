@@ -10,11 +10,11 @@ import {PiPaperPlane} from "react-icons/pi"
 import {MessageFormSchema, messageSchema} from "../utils/schema"
 import {zodResolver} from "@hookform/resolvers/zod"
 import {sendMessage} from "../services/send-message"
-import {Report} from "../services/get-report"
 import {toast} from "sonner"
+import {GetReport} from "../services/get-reports"
 
 type MessageFormProps = {
-    report: Report
+    report: GetReport
 }
 
 const MessageForm = ({report}: MessageFormProps) => {
