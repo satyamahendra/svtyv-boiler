@@ -21,8 +21,8 @@ const UserItem = ({user}: Props) => {
     const restRoles = user.roles.slice(2)
 
     return (
-        <div className="bg-muted hover:bg-muted/50 duration-200 p-2 rounded-xl border">
-            <div className="flex gap-2">
+        <div className={`bg-muted/50 hover:bg-muted duration-200 p-2 border border-l-6 border-l-primary rounded-md`}>
+            <div className="flex gap-2 ml-2">
                 <div>
                     <Avatar className="w-7 h-7">
                         <AvatarImage src={user.image || undefined} />

@@ -6,7 +6,7 @@ import {authClient} from "@/lib/auth-client"
 import {useEffect, useState} from "react"
 import {cn} from "@/lib/utils"
 import {Button} from "@/components/ui/button"
-import {PiCaretLeft, PiHouse} from "react-icons/pi"
+import {PiCaretLeft, PiHouse, PiList} from "react-icons/pi"
 import {useScreenSize} from "@/utils/hooks/useScreenSize"
 import {Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger} from "@/components/ui/drawer"
 import {usePathname} from "next/navigation"
@@ -59,8 +59,8 @@ const Sidebar = () => {
             ) : (
                 <Drawer repositionInputs={false} direction={"left"} open={isOpen} onOpenChange={() => setIsOpen((prev) => !prev)}>
                     <DrawerTrigger asChild className="fixed top-4 left-4">
-                        <Button variant={"secondary"} className="rounded-lg cursor-pointer" size="icon-sm">
-                            <PiHouse />
+                        <Button variant={"default"} className="rounded-lg cursor-pointer" size="icon-lg">
+                            <PiList />
                         </Button>
                     </DrawerTrigger>
                     <DrawerContent aria-describedby="permission-form" className="max-w-[50vw]">

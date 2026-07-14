@@ -3,7 +3,7 @@
 import {Button} from "@/components/ui/button"
 import {authClient} from "@/lib/auth-client"
 import {useTheme} from "next-themes"
-import {PiCalendarDots, PiCircleDashed, PiMoon, PiPower, PiSun} from "react-icons/pi"
+import {PiCalendarDots, PiCircleDashed, PiMoon, PiSignOut, PiSun} from "react-icons/pi"
 import {useState, useEffect} from "react" // 1. Import useEffect
 import {toast} from "sonner"
 import {redirect} from "next/navigation"
@@ -46,13 +46,13 @@ const Topbar = () => {
                         }}
                         variant={"outline"}
                         className="rounded-lg cursor-pointer"
-                        size="icon-sm">
+                        size="icon-lg">
                         {!mounted ? <div className="w-[18px] h-[18px]" /> : theme === "dark" ? <PiMoon /> : <PiSun />}
                     </Button>
                 </li>
                 <li>
-                    <Button onClick={handleLogout} disabled={isLoading} variant={"outline"} className="rounded-lg cursor-pointer" size="icon-sm">
-                        {isLoading ? <PiCircleDashed className="animate-spin" /> : <PiPower />}
+                    <Button onClick={handleLogout} disabled={isLoading} variant={"outline"} className="rounded-lg cursor-pointer" size="icon-lg">
+                        {isLoading ? <PiCircleDashed className="animate-spin" /> : <PiSignOut />}
                     </Button>
                 </li>
             </ul>

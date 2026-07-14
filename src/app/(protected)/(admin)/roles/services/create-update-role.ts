@@ -40,6 +40,7 @@ export async function createUpdateRole(data: RoleFormSchema): Promise<ServerResu
             role = (await prisma.role.create({
                 data: {
                     name,
+                    is_active,
                     permissions: {
                         create: permissions.map((permission_name) => ({permission_name})),
                     },

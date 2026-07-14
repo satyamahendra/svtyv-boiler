@@ -2,7 +2,7 @@
 
 import {useQueryParams} from "@/utils/hooks/useQueryParams"
 import {GetProduct} from "../services/get-products"
-import {PiCircle, PiCircleFill, PiCube, PiPackage, PiPencil} from "react-icons/pi"
+import {PiCube, PiPackage, PiPencil} from "react-icons/pi"
 import {Separator} from "@/components/ui/separator"
 import {normalizeString} from "@/utils/helpers/normalize-string"
 import {Button} from "@/components/ui/button"
@@ -13,21 +13,11 @@ type ProductItemProps = {
 
 const ProductItem = ({product}: ProductItemProps) => {
     const {setParams} = useQueryParams()
+    const isActive = product.is_active
 
     return (
-        <div className="bg-muted hover:bg-muted/50 duration-200 p-2 rounded-xl border">
-            <div className="flex gap-2">
-                <div>
-                    {product.is_active ? (
-                        <div className="text-green-500 flex items-center gap-1">
-                            <PiCircleFill className="text-lg" />
-                        </div>
-                    ) : (
-                        <div className="text-muted-foreground flex items-center gap-1">
-                            <PiCircle className="text-lg" />
-                        </div>
-                    )}
-                </div>
+        <div className={`bg-muted/50 hover:bg-muted duration-200 p-2 border border-l-6 ${isActive ? "border-l-primary" : "border-l-muted-/50"} rounded-md`}>
+            <div className="flex gap-2 ml-2">
                 <div>
                     <div>{product.name}</div>
                     <div className="flex gap-2 text-muted-foreground text-sm">

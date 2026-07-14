@@ -6,7 +6,7 @@ import {format} from "date-fns"
 import {Badge} from "@/components/ui/badge"
 import {normalizeString} from "@/utils/helpers/normalize-string"
 import {Separator} from "@/components/ui/separator"
-import {PiArrowsClockwise, PiCalendarDots, PiCircle, PiCircleFill, PiEye} from "react-icons/pi"
+import {PiArrowsClockwise, PiCalendarDots, PiEye} from "react-icons/pi"
 import {Button} from "@/components/ui/button"
 import {useQuery, useQueryClient} from "@tanstack/react-query"
 import axios from "axios"
@@ -41,19 +41,8 @@ const OrderItem = ({order}: OrderItemProps) => {
     }
 
     return (
-        <div className="bg-muted hover:bg-muted/50 duration-200 p-2 rounded-xl border">
-            <div className="flex gap-2">
-                <div>
-                    {isSuccess ? (
-                        <div className="text-green-500 flex items-center gap-1">
-                            <PiCircleFill className="text-lg" />
-                        </div>
-                    ) : (
-                        <div className="text-muted-foreground flex items-center gap-1">
-                            <PiCircle className="text-lg" />
-                        </div>
-                    )}
-                </div>
+        <div className={`bg-muted/50 hover:bg-muted duration-200 p-2 border border-l-6 ${isSuccess ? "border-l-primary" : "border-l-muted-/50"} rounded-md`}>
+            <div className="flex gap-2 ml-2">
                 <div>
                     <div>{order.user.email}</div>
                     <div className="flex gap-2 text-muted-foreground text-sm">

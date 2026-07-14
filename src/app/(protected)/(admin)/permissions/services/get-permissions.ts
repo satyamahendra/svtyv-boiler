@@ -34,7 +34,6 @@ export async function getPermissions(page: number = 1, search = ""): Promise<Get
         prisma.permission.findMany({
             skip,
             take: PAGE_SIZE,
-            orderBy: {name: "asc"},
             select: permissionSelect,
             where,
         }),
