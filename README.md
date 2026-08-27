@@ -62,3 +62,7 @@ how to start:
    npx prisma generate
    npx prisma migrate dev --name "<your-migration-name>"
    npx prisma migrate deploy
+
+5. > `prisma` must stay pinned to the exact same version as `@prisma/client`
+> (see `package.json`). Installing a newer major (e.g. Prisma 8) silently
+> removes the `migrate` command and breaks `migrate deploy` at deploy time.
