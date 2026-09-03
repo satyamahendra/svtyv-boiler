@@ -7,6 +7,7 @@ export interface MenuItem {
     permissions: string[]
     roles: string[]
     children: MenuItem[]
+    groupType?: "collapsible" | "labelled"
 }
 
 export function hasAccess(item: MenuItem, userPermissions: string[], userRoles: string[]): boolean {
@@ -19,7 +20,7 @@ export function hasAccess(item: MenuItem, userPermissions: string[], userRoles: 
     return matchesDirect
 }
 
-export const menuItems = [
+export const menuItems: MenuItem[] = [
     {
         label: "Home",
         href: "/home",
@@ -34,6 +35,7 @@ export const menuItems = [
         icon: <PiCreditCard />,
         permissions: [],
         roles: [],
+        groupType: "collapsible",
         children: [
             {
                 label: "Permissions",

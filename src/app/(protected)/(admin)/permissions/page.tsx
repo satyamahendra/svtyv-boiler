@@ -1,43 +1,21 @@
 import PageHeader from "@/components/custom/page-header/page-header"
-import {Suspense} from "react"
 import {PiKey} from "react-icons/pi"
-import {PermissionsTable} from "./components/permissions-table"
-import {Loader2} from "lucide-react"
 import {hasPermissions} from "@/utils/helpers/has-ability-server"
 import {redirect} from "next/navigation"
 import AnimDiv from "@/components/custom/anim-div"
-import SearchParams from "@/components/custom/search-params"
+import CreateAttributeModal from "./components/create-attribute-modal"
 import PermissionDetailModal from "./components/permission-detail-modal"
+import PermissionList from "./components/permission-list"
 
-type PageProps = {
-    searchParams: Promise<{
-        page?: string
-        search?: string
-    }>
-}
-
-const Page = async ({searchParams}: PageProps) => {
+const Page = async () => {
     const hasPerm = await hasPermissions(["read permissions", "manage permissions"])
     if (!hasPerm) return redirect("/home")
 
-    const {page, search} = await searchParams
-    const pageNum = page ? parseInt(page) : 1
-
     return (
         <AnimDiv className="flex flex-col gap-4 pb-4">
-            <PageHeader title="Permissions" description="Manage permissions" icon={<PiKey />} subComponent={<PermissionDetailModal />} />
-            <SearchParams className="w-48 self-end" />
-            <Suspense
-                key={`${page}-${search}`}
-                fallback={
-                    <AnimDiv className="flex items-center justify-center h-20">
-                        <span className="text-muted-foreground">
-                            <Loader2 className="animate-spin text-primary" />
-                        </span>
-                    </AnimDiv>
-                }>
-                <PermissionsTable page={pageNum} search={search} />
-            </Suspense>
+            <PageHeader title="Permissions" description="Manage permission attributes and role connections" icon={<PiKey />} subComponent={<CreateAttributeModal />} />
+            <PermissionDetailModal />
+            <PermissionList />
         </AnimDiv>
     )
 }

@@ -30,7 +30,7 @@ const ProductList = async ({page, search}: ProductListProps) => {
     return (
         <AnimDiv className="flex flex-col gap-4">
             {data.data && data.data?.products.length > 0 ? (
-                <div className="overflow-hidden space-y-2">
+                <div className="flex flex-col overflow-hidden">
                     {data.data.products.map((product) => (
                         <ProductItem key={product.id} product={product} />
                     ))}

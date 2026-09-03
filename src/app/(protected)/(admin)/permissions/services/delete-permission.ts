@@ -3,23 +3,18 @@
 import prisma from "@/lib/prisma/client"
 import {revalidatePath} from "next/cache"
 import {ServerResult} from "@/utils/types/server-action"
-import {Permission} from "@/generated/index"
 import {authServer} from "@/lib/auth-server"
 import {handleServerError} from "@/utils/helpers/handle-server-errors"
 
-export async function deletePermission(permissionName: string): Promise<ServerResult<Permission>> {
+export async function deletePermission(name: string): Promise<ServerResult<null>> {
     try {
         const session = await authServer()
-
         if (!session) throw new Error("Unauthorized")
 
-        const permission = (await prisma.permission.delete({
-            where: {name: permissionName},
-            select: {name: true},
-        })) as Permission
+        await prisma.permission.delete({where: {name}})
 
         revalidatePath("/permissions")
-        return {success: true, data: permission, message: `Permission deleted successfully`}
+        return {success: true, data: null, message: `Permission "${name}" deleted`}
     } catch (error) {
         return handleServerError(error)
     }

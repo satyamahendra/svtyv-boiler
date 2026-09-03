@@ -34,6 +34,7 @@ const DeleteButton = ({role}: DeleteButtonProps) => {
             toast.success(res.message)
             setIsOpen(false)
             queryClient.invalidateQueries({queryKey: ["roles"]})
+            queryClient.invalidateQueries({queryKey: ["permissions-matrix"]})
         },
         onError: (error) => {
             toast.error(error.message)

@@ -31,31 +31,33 @@ const Topbar = () => {
     }
 
     return (
-        <header className="flex items-center justify-between w-full">
-            {mounted && !isMobile && (
-                <div className="flex gap-2 items-center text-sm font-light text-muted-foreground">
-                    <PiCalendarDots size={18} />
-                    {format(new Date(), "EEEE, MMMM d, yyyy")}
-                </div>
-            )}
-            <ul className="flex gap-2 ml-auto">
-                <li>
-                    <Button
-                        onClick={() => {
-                            setTheme(theme === "dark" ? "light" : "dark")
-                        }}
-                        variant={"outline"}
-                        className="rounded-lg cursor-pointer"
-                        size="icon-lg">
-                        {!mounted ? <div className="w-[18px] h-[18px]" /> : theme === "dark" ? <PiMoon /> : <PiSun />}
-                    </Button>
-                </li>
-                <li>
-                    <Button onClick={handleLogout} disabled={isLoading} variant={"outline"} className="rounded-lg cursor-pointer" size="icon-lg">
-                        {isLoading ? <PiCircleDashed className="animate-spin" /> : <PiSignOut />}
-                    </Button>
-                </li>
-            </ul>
+        <header className="w-full border-b flex justify-center">
+            <div className="max-w-260 w-full flex justify-between px-6 py-2 items-center">
+                {mounted && !isMobile && (
+                    <div className="flex gap-3 items-center text-lg tracking-tighter font-light">
+                        <div className="aspect-square w-3 h-3 rotate-45 rounded-xs bg-primary"></div>
+                        svtyv
+                    </div>
+                )}
+                <ul className="flex gap-2 ml-auto">
+                    <li>
+                        <Button
+                            onClick={() => {
+                                setTheme(theme === "dark" ? "light" : "dark")
+                            }}
+                            variant={"outline"}
+                            className="rounded-lg cursor-pointer"
+                            size="icon-sm">
+                            {!mounted ? <div className="w-4.5 h-4.5" /> : theme === "dark" ? <PiMoon /> : <PiSun />}
+                        </Button>
+                    </li>
+                    <li>
+                        <Button onClick={handleLogout} disabled={isLoading} variant={"outline"} className="rounded-lg cursor-pointer" size="icon-sm">
+                            {isLoading ? <PiCircleDashed className="animate-spin" /> : <PiSignOut />}
+                        </Button>
+                    </li>
+                </ul>
+            </div>
         </header>
     )
 }

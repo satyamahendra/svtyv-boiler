@@ -1,25 +1,35 @@
 "use client"
 
-import {zodResolver} from "@hookform/resolvers/zod"
-import {Controller, useForm} from "react-hook-form"
-import {PiKey, PiPlus} from "react-icons/pi"
-import {Button} from "@/components/ui/button"
-import {Input} from "@/components/ui/input"
-import {Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet} from "@/components/ui/field"
-import {PermissionFormSchema, permissionSchema} from "../utils/schemas"
-import {createUpdatePermission} from "../services/create-update-permission"
-import {toast} from "sonner"
+import {useEffect, useMemo, useState} from "react"
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query"
+import {PiKey, PiTrash} from "react-icons/pi"
 import {Loader2} from "lucide-react"
-import {useQueryParams} from "@/utils/hooks/useQueryParams"
-import {getPermission} from "../services/get-permission"
-import {Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle} from "@/components/ui/empty"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import {Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle} from "@/components/ui/drawer"
+import {Button} from "@/components/ui/button"
+import {Badge} from "@/components/ui/badge"
 import {Checkbox} from "@/components/ui/checkbox"
-import {getRoles} from "@/utils/services/get-roles"
 import {Switch} from "@/components/ui/switch"
-import {Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger} from "@/components/ui/drawer"
+import {Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle} from "@/components/ui/empty"
+import {toast} from "sonner"
+import {useQueryParams} from "@/utils/hooks/useQueryParams"
 import {useScreenSize} from "@/utils/hooks/useScreenSize"
 import {cn} from "@/lib/utils"
+import {getPermissionsMatrix} from "../services/get-permissions-matrix"
+import {updateRolePermissions} from "../../roles/services/update-role-permissions"
+import {togglePermission} from "../services/toggle-permission"
+import {deletePermission} from "../services/delete-permission"
+import {parsePermission} from "../../roles/utils/permission-matrix"
 
 const PermissionDetailModal = () => {
     const queryClient = useQueryClient()
@@ -28,158 +38,214 @@ const PermissionDetailModal = () => {
 
     const view = getParam("view")
 
-    const {data: permissionData, isLoading} = useQuery({
-        queryKey: ["permission", view],
-        queryFn: () => getPermission(view!),
-        enabled: !!view && view !== "create",
+    const {data: matrix} = useQuery({
+        queryKey: ["permissions-matrix"],
+        queryFn: getPermissionsMatrix,
     })
 
-    const permission = permissionData?.data
+    const allPerms = useMemo(() => matrix?.data?.permissions ?? [], [matrix?.data])
+    const roles = useMemo(() => matrix?.data?.roles ?? [], [matrix?.data])
 
-    const {data: rolesData} = useQuery({
-        queryKey: ["roles", view],
-        queryFn: () => getRoles(),
+    const {relevantPerms, isCrud} = useMemo(() => {
+        if (!view) return {relevantPerms: [], isCrud: false}
+        const crud = allPerms.filter((p) => {
+            const parsed = parsePermission(p.name)
+            return parsed.action !== "other" && parsed.attribute === view
+        })
+        if (crud.length > 0) return {relevantPerms: crud, isCrud: true}
+        return {relevantPerms: allPerms.filter((p) => p.name === view), isCrud: false}
+    }, [allPerms, view])
+
+    const [rolePerms, setRolePerms] = useState<Record<string, string[]>>({})
+    const [isActive, setIsActive] = useState<Record<string, boolean>>({})
+
+    useEffect(() => {
+        const initPerms: Record<string, string[]> = {}
+        const initActive: Record<string, boolean> = {}
+        for (const role of roles) {
+            initPerms[role.name] = role.permission_names
+        }
+        for (const p of allPerms) {
+            initActive[p.name] = p.is_active
+        }
+        setRolePerms(initPerms)
+        setIsActive(initActive)
+    }, [roles, allPerms])
+
+    const invalidation = () => {
+        queryClient.invalidateQueries({queryKey: ["permissions-matrix"]})
+    }
+
+    const saveRole = useMutation({
+        mutationFn: ({roleName, permissions}: {roleName: string; permissions: string[]}) => updateRolePermissions(roleName, permissions),
+        onError: (error) => toast.error(error.message),
     })
 
-    const form = useForm<PermissionFormSchema>({
-        resolver: zodResolver(permissionSchema),
-        values:
-            view === "create"
-                ? {name: "", name_before: "", roles: [], is_active: true}
-                : {
-                      name: permission?.name ?? "",
-                      name_before: permission?.name ?? "",
-                      roles: permission?.roles.map((role) => role.role_name) ?? [],
-                      is_active: permission?.is_active ?? true,
-                  },
+    const saveActive = useMutation({
+        mutationFn: ({name, isActive}: {name: string; isActive: boolean}) => togglePermission(name, isActive),
+        onError: (error) => toast.error(error.message),
     })
 
-    const {mutate, isPending} = useMutation({
-        mutationFn: createUpdatePermission,
+    const deletePerm = useMutation({
+        mutationFn: deletePermission,
         onSuccess: (res) => {
             if (!res.success) return toast.error(res.message)
             toast.success(res.message)
-            queryClient.invalidateQueries({queryKey: ["permissions"]})
-            form.reset()
+            invalidation()
             setParams({view: ""})
         },
-        onError: (error) => {
-            toast.error(error.message)
-        },
+        onError: (error) => toast.error(error.message),
     })
 
-    const onSubmit = (data: PermissionFormSchema) => {
-        mutate(data)
+    const toggleRolePermission = (roleName: string, permissionName: string, checked: boolean) => {
+        const current = rolePerms[roleName] ?? []
+        const next = checked ? [...new Set([...current, permissionName])] : current.filter((n) => n !== permissionName)
+        setRolePerms((prev) => ({...prev, [roleName]: next}))
+    }
+
+    const isPending = saveRole.isPending || saveActive.isPending || deletePerm.isPending
+
+    const onSubmit = async () => {
+        try {
+            const results = await Promise.all([
+                ...roles
+                    .filter((role) => {
+                        const next = [...(rolePerms[role.name] ?? [])].sort()
+                        const orig = [...role.permission_names].sort()
+                        return JSON.stringify(next) !== JSON.stringify(orig)
+                    })
+                    .map((role) => saveRole.mutateAsync({roleName: role.name, permissions: rolePerms[role.name] ?? []})),
+                ...relevantPerms.filter((p) => isActive[p.name] !== p.is_active).map((p) => saveActive.mutateAsync({name: p.name, isActive: isActive[p.name]})),
+            ])
+
+            if (results.length === 0) return
+
+            const failed = results.filter((r) => r && !r.success)
+            if (failed.length > 0) {
+                toast.error("Some changes failed to save")
+            } else {
+                toast.success("Changes saved")
+            }
+            invalidation()
+        } catch {
+            toast.error("Failed to save changes")
+        }
     }
 
     return (
-        <Drawer swipeDirection={isMobile ? "down" : "right"} open={!!view} onOpenChange={(e) => (e ? setParams({view: "create"}) : setParams({view: ""}))}>
-            <DrawerTrigger
-                render={
-                    <Button>
-                        <PiPlus /> Create Permission
-                    </Button>
-                }></DrawerTrigger>
-            <DrawerContent aria-describedby="permission-form" className={cn(isMobile ? "h-[80vh]" : "")}>
+        <Drawer swipeDirection={isMobile ? "down" : "right"} open={!!view} onOpenChange={(open) => !open && setParams({view: ""})}>
+            <DrawerContent aria-describedby="permission-detail" className={cn(isMobile ? "h-[80vh]" : "")}>
                 <DrawerHeader className="flex flex-col items-center justify-center">
-                    <DrawerTitle className="flex items-center gap-4">{view !== "create" ? "Edit" : "Create"} Permission</DrawerTitle>
-                    <DrawerDescription className="flex items-center gap-4">
-                        {view !== "create" ? "Edit" : "Create"} a custom permission for your organization.
-                    </DrawerDescription>
+                    <DrawerTitle className="flex items-center gap-4">
+                        <PiKey /> {view || ""}
+                    </DrawerTitle>
+                    <DrawerDescription className="flex items-center gap-4">Connect this attribute to roles and toggle availability.</DrawerDescription>
                 </DrawerHeader>
 
                 <div className="p-6 flex-1 overflow-y-auto">
-                    {isLoading ? (
+                    {!matrix?.data ? (
                         <div className="flex items-center justify-center h-20">
                             <Loader2 className="animate-spin text-primary" />
                         </div>
-                    ) : !permissionData?.success && view !== "create" && !!view ? (
+                    ) : relevantPerms.length === 0 ? (
                         <Empty>
                             <EmptyHeader>
                                 <EmptyMedia variant="icon">
                                     <PiKey />
                                 </EmptyMedia>
-                                <EmptyTitle>Failed to fetch permission</EmptyTitle>
-                                <EmptyDescription>Failed to fetch permission. Please try again.</EmptyDescription>
+                                <EmptyTitle>No matching permissions</EmptyTitle>
+                                <EmptyDescription>{`No permissions found for "${view}".`}</EmptyDescription>
                             </EmptyHeader>
                         </Empty>
                     ) : (
-                        <>
-                            <form id="permission-form" onSubmit={form.handleSubmit(onSubmit)} className={isPending ? "pointer-events-none opacity-50" : ""}>
-                                <FieldGroup>
-                                    <Controller
-                                        name="name"
-                                        control={form.control}
-                                        render={({field, fieldState}) => (
-                                            <Field data-invalid={fieldState.invalid}>
-                                                <FieldLabel htmlFor={field.name}>Permission Name</FieldLabel>
-                                                <Input {...field} id={field.name} aria-invalid={fieldState.invalid} placeholder="read users" autoComplete="off" />
-                                                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                                            </Field>
-                                        )}
-                                    />
+                        <div className="flex flex-col gap-6">
+                            <div className="flex flex-col gap-3">
+                                {relevantPerms.map((p) => (
+                                    <div key={p.name} className="flex items-center gap-2">
+                                        <Badge variant="outline" className="capitalize">
+                                            {p.name}
+                                        </Badge>
+                                        <span className="ml-auto text-xs text-muted-foreground">{isActive[p.name] ? "enabled" : "disabled"}</span>
+                                        <Switch size="sm" checked={isActive[p.name] ?? false} onCheckedChange={(c) => setIsActive((prev) => ({...prev, [p.name]: c}))} />
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button className="rounded-lg" size={"icon-sm"} variant="destructive">
+                                                    <PiTrash />
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader className="space-y-2">
+                                                    <AlertDialogTitle className="flex flex-col items-center justify-center w-full gap-2">
+                                                        <div className="w-10 h-10 rounded-sm bg-muted flex items-center justify-center">
+                                                            <PiTrash className="text-muted-foreground text-xl" />
+                                                        </div>
+                                                        Delete &quot;{p.name}&quot;?
+                                                    </AlertDialogTitle>
+                                                    <AlertDialogDescription className="text-center">
+                                                        This will remove this permission from all roles and users. This action cannot be undone.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter className="flex justify-center gap-2">
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction disabled={deletePerm.isPending} onClick={() => deletePerm.mutate(p.name)}>
+                                                        {deletePerm.isPending ? "Deleting..." : "Delete"}
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </div>
+                                ))}
+                            </div>
 
-                                    <Controller
-                                        name="roles"
-                                        control={form.control}
-                                        render={({field, fieldState}) => (
-                                            <FieldSet>
-                                                <FieldLegend variant="label">Roles</FieldLegend>
-                                                <FieldDescription>Define the roles for this permission.</FieldDescription>
-                                                <FieldGroup data-slot="checkbox-group">
-                                                    {rolesData?.success &&
-                                                        rolesData.data.map((role) => (
-                                                            <Field key={role.name} orientation="horizontal" data-invalid={fieldState.invalid}>
-                                                                <Checkbox
-                                                                    id={`form-rhf-checkbox-${role.name}`}
-                                                                    name={field.name}
-                                                                    aria-invalid={fieldState.invalid}
-                                                                    value={role.name}
-                                                                    checked={field.value?.includes(role.name)}
-                                                                    onCheckedChange={(checked) => {
-                                                                        const newValue = checked
-                                                                            ? [...(field.value ?? []), role.name]
-                                                                            : (field.value ?? []).filter((value) => value !== role.name)
-                                                                        field.onChange(newValue)
-                                                                    }}
-                                                                />
-                                                                <FieldLabel htmlFor={`form-rhf-checkbox-${role.name}`} className="font-normal">
-                                                                    {role.name}
-                                                                </FieldLabel>
-                                                            </Field>
-                                                        ))}
-                                                </FieldGroup>
-                                                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                                            </FieldSet>
-                                        )}
-                                    />
-
-                                    <Controller
-                                        name="is_active"
-                                        control={form.control}
-                                        render={({field}) => (
-                                            <Field>
-                                                <FieldLabel htmlFor="is_active">is active?</FieldLabel>
-                                                <Switch id="is_active" checked={field.value} onCheckedChange={field.onChange} />
-                                            </Field>
-                                        )}
-                                    />
-                                </FieldGroup>
-                            </form>
-                        </>
+                            <div className="overflow-x-auto rounded-xl border">
+                                <table className="w-full min-w-max text-sm">
+                                    <thead>
+                                        <tr className="border-b bg-muted/50">
+                                            <th className="sticky left-0 bg-muted/50 px-3 py-2 text-left font-medium text-muted-foreground">Role</th>
+                                            {isCrud &&
+                                                relevantPerms.map((p) => (
+                                                    <th key={p.name} className="px-3 py-2 text-center font-medium capitalize">
+                                                        {parsePermission(p.name).action}
+                                                    </th>
+                                                ))}
+                                            {!isCrud && <th className="px-3 py-2 text-center font-medium">Assigned</th>}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {roles.map((role) => (
+                                            <tr key={role.name} className="border-b last:border-0">
+                                                <td className="sticky left-0 bg-background px-3 py-2 font-medium">{role.name}</td>
+                                                {relevantPerms.map((p) => {
+                                                    const checked = (rolePerms[role.name] ?? []).includes(p.name)
+                                                    return (
+                                                        <td key={p.name} className="px-3 py-2 text-center">
+                                                            <Checkbox
+                                                                checked={checked}
+                                                                onCheckedChange={(c) => toggleRolePermission(role.name, p.name, !!c)}
+                                                                title={p.name}
+                                                            />
+                                                        </td>
+                                                    )
+                                                })}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     )}
                 </div>
 
                 <DrawerFooter>
+                    <Button disabled={isPending} type="button" onClick={onSubmit} className="w-full">
+                        {isPending ? <Loader2 className="animate-spin" /> : "Submit"}
+                    </Button>
                     <DrawerClose
                         render={
                             <Button variant="outline" className="w-full">
-                                Cancel
+                                Close
                             </Button>
                         }></DrawerClose>
-                    <Button disabled={isPending} type="submit" form="permission-form">
-                        {isPending ? <Loader2 className="animate-spin" /> : "Submit"}
-                    </Button>
                 </DrawerFooter>
             </DrawerContent>
         </Drawer>

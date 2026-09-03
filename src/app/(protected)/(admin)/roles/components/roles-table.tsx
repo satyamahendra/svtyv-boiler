@@ -28,7 +28,7 @@ export async function RolesTable({page, search}: Props) {
                     </Empty>
                 </div>
             ) : (
-                <div className="overflow-hidden space-y-2">
+                <div className="flex flex-col overflow-hidden">
                     {data.roles.map((role) => (
                         <RoleItem key={role.name} role={role} />
                     ))}

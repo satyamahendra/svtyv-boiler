@@ -30,7 +30,7 @@ const OrderList = async ({page, search}: OrderListProps) => {
     return (
         <AnimDiv className="flex flex-col gap-4">
             {data.data && data.data?.orders.length > 0 ? (
-                <div className="overflow-hidden space-y-2">
+                <div className="flex flex-col overflow-hidden">
                     {data.data.orders.map((order) => (
                         <OrderItem key={order.id} order={order} />
                     ))}

@@ -6,7 +6,7 @@ import {authClient} from "@/lib/auth-client"
 import {useEffect, useState} from "react"
 import {cn} from "@/lib/utils"
 import {Button} from "@/components/ui/button"
-import {PiCaretLeft, PiHouse, PiList} from "react-icons/pi"
+import {PiList} from "react-icons/pi"
 import {useScreenSize} from "@/utils/hooks/useScreenSize"
 import {Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger} from "@/components/ui/drawer"
 import {usePathname} from "next/navigation"
@@ -20,12 +20,6 @@ const Sidebar = () => {
 
     const userPermissions = session?.user?.permissions ?? []
     const userRoles = session?.user?.roles ?? []
-
-    const [isExpand, setIsExpand] = useState(false)
-
-    const handleToggleExpand = () => {
-        setIsExpand((prev) => !prev)
-    }
 
     useEffect(() => {
         if (isMobile) {
@@ -42,16 +36,13 @@ const Sidebar = () => {
     return (
         <>
             {!isMobile ? (
-                <aside className={cn("h-screen relative top-0 left-0 p-4 transition-all duration-300 ease-in-out", isExpand ? "w-64" : "w-[75px]")}>
-                    <div className="bg-sidebar border p-4 rounded-lg h-full flex flex-col overflow-hidden">
-                        <Button variant={"secondary"} onClick={handleToggleExpand} size="icon-xs" className="absolute right-1 top-8 shrink-0">
-                            <PiCaretLeft className={cn("transition-transform duration-300", !isExpand && "rotate-180")} />
-                        </Button>
+                <aside className={cn("top-0 p-6 left-0 transition-all duration-300 ease-in-out w-52")}>
+                    <div className=" rounded-lg h-full flex flex-col overflow-hidden">
                         <ul className="flex flex-col gap-1">
                             {menuItems
                                 .filter((menu) => hasAccess(menu, userPermissions, userRoles))
                                 .map((menu) => (
-                                    <SidebarItem key={menu.label} menu={menu} userPermissions={userPermissions} userRoles={userRoles} isExpand={isExpand} />
+                                    <SidebarItem key={menu.label} menu={menu} userPermissions={userPermissions} userRoles={userRoles} />
                                 ))}
                         </ul>
                     </div>
@@ -59,9 +50,9 @@ const Sidebar = () => {
             ) : (
                 <Drawer swipeDirection={"left"} open={isOpen} onOpenChange={() => setIsOpen((prev) => !prev)}>
                     <DrawerTrigger
-                        className="fixed top-4 left-4"
+                        className="fixed top-1 left-4"
                         render={
-                            <Button variant={"default"} className="rounded-lg cursor-pointer" size="icon-lg">
+                            <Button variant={"secondary"} className="rounded-lg cursor-pointer" size="icon-lg">
                                 <PiList />
                             </Button>
                         }></DrawerTrigger>
@@ -75,7 +66,7 @@ const Sidebar = () => {
                                 {menuItems
                                     .filter((menu) => hasAccess(menu, userPermissions, userRoles))
                                     .map((menu) => (
-                                        <SidebarItem key={menu.label} menu={menu} userPermissions={userPermissions} userRoles={userRoles} isExpand={true} />
+                                        <SidebarItem key={menu.label} menu={menu} userPermissions={userPermissions} userRoles={userRoles} />
                                     ))}
                             </ul>
                         </div>

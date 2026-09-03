@@ -30,7 +30,7 @@ const ReportList = async ({page, search}: ReportListProps) => {
     return (
         <AnimDiv className="flex flex-col gap-4">
             {data.data && data.data?.reports.length > 0 ? (
-                <div className="overflow-hidden space-y-2">
+                <div className="flex flex-col overflow-hidden">
                     {data.data.reports.map((report) => (
                         <ReportItem key={report.id} report={report} />
                     ))}

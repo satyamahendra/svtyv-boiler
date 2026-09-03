@@ -28,7 +28,7 @@ export async function UsersTable({page, search}: Props) {
                     </Empty>
                 </div>
             ) : (
-                <div className="overflow-hidden space-y-2">
+                <div className="flex flex-col overflow-hidden">
                     {data.users.map((user) => (
                         <UserItem key={user.id} user={user} />
                     ))}

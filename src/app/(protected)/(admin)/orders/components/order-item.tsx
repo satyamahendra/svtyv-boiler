@@ -13,6 +13,7 @@ import axios from "axios"
 import {toast} from "sonner"
 import {useRouter} from "next/navigation"
 import {Loader2} from "lucide-react"
+import ListItem from "@/components/custom/item"
 
 type OrderItemProps = {
     order: GetOrder
@@ -41,35 +42,33 @@ const OrderItem = ({order}: OrderItemProps) => {
     }
 
     return (
-        <div className={`bg-muted/50 hover:bg-muted duration-200 p-2 border border-l-6 ${isSuccess ? "border-l-primary" : "border-l-muted-/50"} rounded-md`}>
-            <div className="flex gap-2 ml-2">
-                <div>
-                    <div>{order.user.email}</div>
-                    <div className="flex gap-2 text-muted-foreground text-sm">
-                        <span className="flex items-center font-bold gap-2">Rp. {order.gross_amount}</span>
-                        <Separator orientation="vertical" />
-                        <span className="flex items-center gap-1">
-                            <PiCalendarDots className="text-sm" />
-                            {format(order.created_at, "dd MMM yyyy")}
-                        </span>
-                        <Separator orientation="vertical" />
-                        <span>
-                            <Badge variant={"default"} className={`${isSuccess ? "bg-green-200 text-green-700" : "bg-muted text-muted-foreground"}`}>
-                                {normalizeString(order.status)}
-                            </Badge>
-                        </span>
-                    </div>
+        <ListItem
+            title={order.user.email}
+            description={
+                <div className="flex flex-wrap items-center gap-2">
+                    <span className="flex items-center gap-2 font-medium">Rp. {order.gross_amount}</span>
+                    <Separator orientation="vertical" />
+                    <span className="flex items-center gap-1">
+                        <PiCalendarDots className="text-sm" />
+                        {format(order.created_at, "dd MMM yyyy")}
+                    </span>
+                    <Separator orientation="vertical" />
+                    <Badge variant={"default"} className={`${isSuccess ? "bg-green-200 text-green-700" : "bg-muted text-muted-foreground"}`}>
+                        {normalizeString(order.status)}
+                    </Badge>
                 </div>
-                <div className="ml-auto flex gap-2">
+            }
+            actions={
+                <>
                     <Button className="rounded-lg" disabled={isLoading} onClick={handleCheckOrderStatus} size={"icon-sm"} variant="outline">
                         {isLoading ? <Loader2 className="animate-spin" /> : <PiArrowsClockwise />}
                     </Button>
                     <Button className="rounded-lg" onClick={() => setParams({view: order.id})} size={"icon-sm"} variant="outline">
                         <PiEye />
                     </Button>
-                </div>
-            </div>
-        </div>
+                </>
+            }
+        />
     )
 }
 
