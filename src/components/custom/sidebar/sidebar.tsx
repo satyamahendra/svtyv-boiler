@@ -48,7 +48,7 @@ const Sidebar = () => {
                     </div>
                 </aside>
             ) : (
-                <Drawer swipeDirection={"left"} open={isOpen} onOpenChange={() => setIsOpen((prev) => !prev)}>
+                <Drawer swipeDirection={"up"} open={isOpen} onOpenChange={() => setIsOpen((prev) => !prev)}>
                     <DrawerTrigger
                         className="fixed top-1 left-4"
                         render={
@@ -56,7 +56,7 @@ const Sidebar = () => {
                                 <PiList />
                             </Button>
                         }></DrawerTrigger>
-                    <DrawerContent aria-describedby="permission-form" className="h-fit max-w-[50vw]">
+                    <DrawerContent aria-describedby="permission-form" className="">
                         <DrawerHeader>
                             <DrawerTitle className="flex items-center gap-4">Svtyv</DrawerTitle>
                             <DrawerDescription className="flex items-center gap-4">Welcome to svtyv</DrawerDescription>

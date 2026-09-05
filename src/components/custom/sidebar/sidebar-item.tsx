@@ -34,17 +34,17 @@ const SidebarItem = ({menu, userPermissions, userRoles}: SidebarItemProps) => {
     }, [pathname, isChildActive])
 
     const linkClass = cn(
-        "flex items-center rounded-md px-2 py-2 text-sm transition-colors",
-        "hover:bg-primary hover:text-primary-foreground",
-        isActive && "bg-primary text-primary-foreground",
+        "flex items-center rounded-md px-2 py-1.5 text-sm transition-colors text-muted-foreground",
+        "hover:bg-muted hover:text-accent-foreground",
+        isActive && "bg-muted text-accent-foreground",
     )
 
     if (!hasChildren) {
         return (
             <li>
                 <Link href={menu.href} className={linkClass}>
-                    <span className="text-lg shrink-0 flex items-center justify-center">{menu.icon}</span>
-                    <span className="whitespace-nowrap overflow-hidden ml-3">{menu.label}</span>
+                    {menu.icon && <span className="text-lg shrink-0 flex items-center justify-center mr-3">{menu.icon}</span>}
+                    <span className="whitespace-nowrap overflow-hidden">{menu.label}</span>
                 </Link>
             </li>
         )
@@ -54,8 +54,8 @@ const SidebarItem = ({menu, userPermissions, userRoles}: SidebarItemProps) => {
         return (
             <li>
                 <div className={cn(linkClass, "text-muted-foreground pointer-events-none")}>
-                    <span className="text-lg shrink-0 flex items-center justify-center">{menu.icon}</span>
-                    <span className="whitespace-nowrap overflow-hidden ml-3">{menu.label}</span>
+                    {menu.icon && <span className="text-lg shrink-0 flex items-center justify-center mr-3">{menu.icon}</span>}
+                    <span className="whitespace-nowrap overflow-hidden">{menu.label}</span>
                 </div>
                 <ul className="mt-1 flex flex-col gap-1 pl-6">
                     {accessibleChildren.map((child) => (
@@ -70,17 +70,17 @@ const SidebarItem = ({menu, userPermissions, userRoles}: SidebarItemProps) => {
         <li>
             <Collapsible open={open} onOpenChange={setOpen}>
                 <CollapsibleTrigger asChild>
-                    <button className={cn(linkClass, "w-full justify-between", isChildActive && "text-accent-foreground font-medium")}>
+                    <button className={cn(linkClass, "w-full justify-between", isChildActive && "text-accent-foreground")}>
                         <span className="flex items-center">
-                            <span className="text-lg shrink-0 flex items-center justify-center">{menu.icon}</span>
-                            <span className="whitespace-nowrap overflow-hidden ml-3">{menu.label}</span>
+                            {menu.icon && <span className="text-lg shrink-0 flex items-center justify-center mr-3">{menu.icon}</span>}
+                            <span className="whitespace-nowrap overflow-hidden">{menu.label}</span>
                         </span>
                         <PiCaretDown className={cn("shrink-0 ml-auto transition-transform duration-300", open ? "rotate-180" : "rotate-0")} />
                     </button>
                 </CollapsibleTrigger>
 
                 <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-                    <ul className="mt-1 flex flex-col gap-1 pl-6">
+                    <ul className="mt-1 flex flex-col gap-1 border-l pl-2 ml-4">
                         {accessibleChildren.map((child) => (
                             <SidebarItem key={child.label} menu={child} userPermissions={userPermissions} userRoles={userRoles} />
                         ))}
