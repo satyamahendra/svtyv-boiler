@@ -44,7 +44,7 @@ const CreatePermissionModal = () => {
                     <DrawerTitle className="flex items-center gap-4">
                         <PiKey /> Add Attribute
                     </DrawerTitle>
-                    <DrawerDescription className="flex items-center gap-4">Type an attribute to auto-create its CRUD permissions.</DrawerDescription>
+                    <DrawerDescription className="flex items-center gap-4">Type an attribute to auto-create its CRUD + manage permissions.</DrawerDescription>
                 </DrawerHeader>
 
                 <div className="p-6 flex-1">
@@ -63,7 +63,7 @@ const CreatePermissionModal = () => {
                                 <FieldLabel htmlFor="attribute">Attribute Name</FieldLabel>
                                 <Input id="attribute" name="attribute" placeholder="users" autoComplete="off" required />
                             </Field>
-                            <FieldDescription>Creates: create, read, update, delete for this attribute.</FieldDescription>
+                            <FieldDescription>Creates: create, read, update, delete, manage for this attribute.</FieldDescription>
                         </FieldGroup>
                     </form>
                 </div>

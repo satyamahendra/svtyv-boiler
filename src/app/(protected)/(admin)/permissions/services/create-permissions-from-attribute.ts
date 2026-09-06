@@ -33,7 +33,7 @@ export async function createPermissionsFromAttribute(attribute: string): Promise
 
         revalidatePath("/permissions")
         if (missing.length === 0) {
-            return {success: true, data: null, message: `All CRUD permissions for "${trimmed}" already exist`}
+            return {success: true, data: null, message: `All permissions for "${trimmed}" already exist`}
         }
         const added = missing.map((name) => name.replace(` ${trimmed}`, "")).join(", ")
         return {success: true, data: null, message: `Added ${added} permission${missing.length > 1 ? "s" : ""} for "${trimmed}"`}

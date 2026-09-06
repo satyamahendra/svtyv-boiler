@@ -1,4 +1,5 @@
-export const CRUD_ACTIONS = ["create", "read", "update", "delete"] as const
+// ponytail: "manage" sits beside CRUD — the matrix renders whatever this lists
+export const CRUD_ACTIONS = ["create", "read", "update", "delete", "manage"] as const
 export type CrudAction = (typeof CRUD_ACTIONS)[number]
 
 export type ParsedPermission =
@@ -43,6 +44,7 @@ export function groupPermissions(permissionNames: string[]): GroupedPermissions 
             read: false,
             update: false,
             delete: false,
+            manage: false,
         }
         entry[parsed.action] = true
         attributeMap.set(parsed.attribute, entry)
