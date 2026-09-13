@@ -18,7 +18,6 @@ how to start:
 3. seed data
    -- Permissions
    INSERT INTO permission (name) VALUES
-   ('read home'),
    ('manage home'),
    ('read permissions'),
    ('manage permissions'),
@@ -29,7 +28,7 @@ how to start:
    ('read orders'),
    ('manage orders'),
    ('read products'),
-   ('manage products')
+   ('manage products'),
    ('read reports'),
    ('manage reports')
    ON CONFLICT (name) DO NOTHING;
