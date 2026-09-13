@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
         let status = "pending"
         if (transactionStatus == "capture") {
             if (fraudStatus == "challenge") {
-                status = "challenge"
+                status = "pending"
             } else if (fraudStatus == "accept") {
                 status = "success"
             }
@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
         const order = await prisma.order.findUnique({
             select: {
                 id: true,
+                gross_amount: true,
                 midtrans_request: true,
                 entitlements: {select: {id: true}},
                 user: {select: {id: true}},
@@ -43,6 +44,7 @@ export async function POST(req: NextRequest) {
         })
 
         if (!order) throw new Error("Order not found")
+        if (Number(transaction.gross_amount) !== order.gross_amount) throw new Error("Amount mismatch")
 
         const midtransRequest = order.midtrans_request as {
             item_details: {id: string; name: string; price: number; quantity: number}[]
@@ -80,7 +82,7 @@ export async function POST(req: NextRequest) {
 
         return apiSuccess(transaction, "Transaction status updated successfully", 200)
     } catch (error) {
-        console.log(error)
+        console.error(`[webhook] ${error instanceof Error ? error.message : "unknown error"}`)
         return apiError(error)
     }
 }

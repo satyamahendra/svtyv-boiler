@@ -21,7 +21,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         let status = "pending"
         if (transactionStatus == "capture") {
             if (fraudStatus == "challenge") {
-                status = "challenge"
+                status = "pending"
             } else if (fraudStatus == "accept") {
                 status = "success"
             }
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
                 entitlements: {select: {id: true}},
                 user: {select: {id: true}},
             },
-            where: {midtrans_order_id: midtransOrderId as string},
+            where: {midtrans_order_id: midtransOrderId as string, user_id: session.user.id},
         })
 
         if (!order) throw new Error("Order not found")
