@@ -13,7 +13,7 @@ const PageHeader = ({title, description, icon, subComponent}: PageHeaderProps) =
                 <h2 className="font-semibold text-xl">{title}</h2>
                 <p className="text-sm text-muted-foreground">{description}</p>
             </div>
-            <div className="ml-auto">{subComponent}</div>
+            <div className="w-full">{subComponent}</div>
         </header>
     )
 }
